@@ -36,3 +36,8 @@ export async function crearReporte(localId, tipo, valor, pos) {
 export async function estadoLocal(localId) {
   try { return await backend.rpc('estado_local', { p_local_id: localId }) } catch (e) { throw falla(e) }
 }
+
+// Gasta un pase gratis sobre un local. { ok:true, pases_restantes } | { ok:false, motivo:'sin_pases'|'pase_ya_usado'|'ya_tienes_acceso'|... }
+export async function usarPaseGratis(localId) {
+  try { return await backend.rpc('usar_pase_gratis', { p_local_id: localId }) } catch (e) { return { ok: false, motivo: aMotivo(e) } }
+}

@@ -5,7 +5,7 @@
 import { LOCALES_DEMO } from '../data/localesDemo.js'
 import { distanciaM } from './geo.js'
 import {
-  DWELL_S, COOLDOWN_S, ACCESO_VIGENCIA_S, CHECKIN_VIGENCIA_S, REPORTE_VIGENCIA_S, TOLERANCIA_GPS_M
+  DWELL_S, COOLDOWN_S, ACCESO_VIGENCIA_S, CHECKIN_VIGENCIA_S, REPORTE_VIGENCIA_S, TOLERANCIA_GPS_M, PASES_GRATIS_MAX
 } from '../config.js'
 
 const K_DB = 'rl_demo_db'
@@ -20,7 +20,7 @@ const idLocal = i => `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}
 const LOCALES = LOCALES_DEMO.map((l, i) => ({ ...l, uuid: idLocal(i) }))
 
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`)
-const vacia = () => ({ usuarios: [], checkins: [], reportes: [] })
+const vacia = () => ({ usuarios: [], checkins: [], reportes: [], pases: [] })
 
 function leerDb() {
   try { return { ...vacia(), ...JSON.parse(localStorage.getItem(K_DB) || '{}') } } catch { return vacia() }
@@ -39,6 +39,12 @@ function tieneAcceso(db, userId) {
   const u = db.usuarios.find(x => x.id === userId)
   return !!(u && u.ultimo_reporte_en && Date.now() - u.ultimo_reporte_en <= ACCESO_VIGENCIA_S * 1000)
 }
+
+// Pase gratis (espejo de 0005): vigencia = la del acceso por reporte.
+const paseActivo = (db, userId, localId) =>
+  db.pases.some(p => p.usuario_id === userId && p.local_id === localId && Date.now() - p.creado_en < ACCESO_VIGENCIA_S * 1000)
+const pasesRestantes = (db, userId) =>
+  Math.max(PASES_GRATIS_MAX - db.pases.filter(p => p.usuario_id === userId).length, 0)
 
 const rpcs = {
   locales_cercanos({ p_lat, p_lng, p_radio_m = 5000 }) {
@@ -97,14 +103,29 @@ const rpcs = {
 
   estado_local({ p_local_id }, db, userId) {
     if (!userId) throw err('no_autenticado', '28000')
-    if (!tieneAcceso(db, userId)) return { acceso: false, motivo: 'sin_reporte_vigente' }
+    const acceso = tieneAcceso(db, userId)
+    if (!acceso && !paseActivo(db, userId, p_local_id)) {
+      return { acceso: false, motivo: 'sin_reporte_vigente', pases_restantes: pasesRestantes(db, userId) }
+    }
     const ahora = Date.now()
     const estado = {}
     db.reportes
       .filter(r => r.local_id === p_local_id && r.creado_en > ahora - REPORTE_VIGENCIA_S * 1000)
       .sort((a, b) => a.creado_en - b.creado_en)
       .forEach(r => { estado[r.tipo] = { valor: r.valor, hace_min: Math.round((ahora - r.creado_en) / 60000) } })
-    return { acceso: true, local_id: p_local_id, estado }
+    return { acceso: true, local_id: p_local_id, via: acceso ? 'reporte' : 'pase', estado }
+  },
+
+  usar_pase_gratis({ p_local_id }, db, userId) {
+    if (!userId) throw err('no_autenticado', '28000')
+    const rest = () => pasesRestantes(db, userId)
+    if (!LOCALES.some(l => l.uuid === p_local_id)) return { ok: false, motivo: 'local_no_existe', pases_restantes: rest() }
+    if (tieneAcceso(db, userId)) return { ok: false, motivo: 'ya_tienes_acceso', pases_restantes: rest() }
+    if (paseActivo(db, userId, p_local_id)) return { ok: true, ya_activo: true, pases_restantes: rest() }
+    if (db.pases.some(p => p.usuario_id === userId && p.local_id === p_local_id)) return { ok: false, motivo: 'pase_ya_usado', pases_restantes: rest() }
+    if (rest() <= 0) return { ok: false, motivo: 'sin_pases', pases_restantes: 0 }
+    db.pases.push({ usuario_id: userId, local_id: p_local_id, creado_en: Date.now() })
+    return { ok: true, pases_restantes: rest() }
   }
 }
 
@@ -116,13 +137,13 @@ const notificarAuth = () => { const u = sesion(); oyentesAuth.forEach(cb => cb(u
 const suscriptores = new Set() // { onInsert, onEstado }
 const canal = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('rl_demo_reportes') : null
 
-// Réplica de la política RLS reportes_g2g: solo reciben el evento quienes tienen acceso (o son el autor).
+// Réplica de la política RLS reportes_g2g: reciben el evento quienes tienen acceso, un pase sobre ese local, o son el autor.
 function entregar(fila) {
   if (!enLinea()) return // WebSocket caído: el evento se pierde y la app debe reconciliar al volver (TC-08)
   const db = leerDb()
   const u = sesion()
   if (!u) return
-  if (fila.usuario_id === u.id || tieneAcceso(db, u.id)) {
+  if (fila.usuario_id === u.id || tieneAcceso(db, u.id) || paseActivo(db, u.id, fila.local_id)) {
     suscriptores.forEach(s => s.onInsert({ ...fila }))
   }
 }

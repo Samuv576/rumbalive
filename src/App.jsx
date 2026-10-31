@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { backend } from './lib/backend.js'
-import { localesCercanos } from './lib/api.js'
+import { localesCercanos, usarPaseGratis } from './lib/api.js'
 import { distanciaM } from './lib/geo.js'
 import { useUbicacion } from './hooks/useUbicacion.js'
 import { useEstados } from './hooks/useEstados.js'
@@ -97,10 +97,17 @@ function Principal() {
   }, [user])
 
   // T06/T07 · estado por local, tiempo real y reconexión.
-  const { estados, conexion, refrescarTodo } = useEstados(user, locales)
+  const { estados, conexion, refrescarTodo, refrescarLocal } = useEstados(user, locales)
   const alAccionar = useCallback((localId, reporto) => {
     setSelId(localId)
     if (reporto) refrescarTodo()
+  }, [refrescarTodo])
+
+  // Pase gratis: gasta un pase sobre el local elegido y refresca ese local.
+  const usarPase = useCallback(async local => {
+    const r = await usarPaseGratis(local.id)
+    if (r.ok || r.motivo === 'ya_tienes_acceso') await refrescarTodo()
+    return r
   }, [refrescarTodo])
 
   const chipConexion = !user ? { t: MODO_DEMO ? 'Demo' : 'Público', c: 'mut' }
@@ -150,7 +157,7 @@ function Principal() {
         )}
 
         {sel && <h2 className="local-nombre" data-testid="local-nombre">{sel.nombre}</h2>}
-        <EstadoLocal user={user} local={sel} info={sel ? estados[sel.id] : null} onLogin={() => setVerAuth(true)} />
+        <EstadoLocal user={user} local={sel} info={sel ? estados[sel.id] : null} onLogin={() => setVerAuth(true)} onUsarPase={usarPase} />
         <Accion user={user} pos={pos} ubic={ubic} locales={locales} checkin={checkin}
           setCheckin={setCheckin} onLogin={() => setVerAuth(true)} onReporteOk={alAccionar} />
       </section>

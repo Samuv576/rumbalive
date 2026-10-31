@@ -16,6 +16,7 @@ const seg = (nombre, porDefecto) => {
 export const DWELL_S = seg('dwell', 3 * 60)               // dwell_min_min = 3
 export const COOLDOWN_S = seg('cooldown', 2 * 60)         // cooldown_reporte_min = 2
 export const ACCESO_VIGENCIA_S = seg('acceso', 180 * 60)  // acceso_vigencia_min = 180
+export const PASES_GRATIS_MAX = (() => { const v = Number(q.get('pases')); return MODO_DEMO && Number.isInteger(v) && v >= 0 && q.has('pases') ? v : 1 })() // MVP 1; versión final 3 (solo lo usa el simulador: el servidor decide)
 export const CHECKIN_VIGENCIA_S = 120 * 60                // checkin_vigencia_min = 120
 export const REPORTE_VIGENCIA_S = 60 * 60                 // reporte_vigencia_min = 60
 export const TOLERANCIA_GPS_M = 25                        // tolerancia_gps_max_m = 25

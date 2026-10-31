@@ -7,5 +7,5 @@ Necesitas PostgreSQL 16 con PostGIS. Ejemplo:
 ```bash
 createdb rl && psql -d rl -c "create schema extensions"
 psql -d rl -v ON_ERROR_STOP=1 -f supabase/local/stub_supabase.sql -f supabase/setup_completo.sql
-psql -d rl -f supabase/tests/pruebas.sql      # 29 filas PASA
+psql -d rl -f supabase/tests/pruebas.sql      # 46 filas PASA
 ```

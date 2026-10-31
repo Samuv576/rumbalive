@@ -57,3 +57,5 @@ button.lnk { background: none; color: var(--mut); padding: 4px 6px; font-weight:
 .modal-card label { display:flex; flex-direction:column; gap:4px; font-size:13px; color: var(--mut); }
 .modal-card input { background:#0b0b12; color: var(--fg); border:1px solid #2a2a3d; border-radius:10px; padding:11px; font-size:16px; }
 .leaflet-container { background:#1d1d2c; }
+.confirma { display:flex; flex-direction:column; gap:8px; background:#2a2a3d; border-radius:10px; padding:10px; }
+.confirma .row { justify-content:flex-start; }

@@ -22,7 +22,7 @@ El orden importa: T01 desbloquea todo lo demás. **T02–T07 ya tienen código**
 
 **Área:** infra  ·  **Depende de:** —
 
-**Objetivo:** Dejar la base de datos funcionando con las reglas de negocio y las 29 pruebas en verde.
+**Objetivo:** Dejar la base de datos funcionando con las reglas de negocio y las 46 pruebas en verde.
 
 **Pasos**
 1. Crear cuenta y proyecto en supabase.com (región São Paulo). Guardar la contraseña de la BD en un gestor, NO en el repo.
@@ -30,12 +30,12 @@ El orden importa: T01 desbloquea todo lo demás. **T02–T07 ya tienen código**
 3. Agregar a los demás integrantes al proyecto (Organization → Team) para que no dependa de una sola persona.
 4. SQL Editor: ejecutar `supabase/setup_completo.sql` completo.
 5. Ejecutar `supabase/migrations/0004_seed_locales_campus.sql` (4 locales del campus, coordenadas ya medidas).
-6. Ejecutar `supabase/tests/pruebas.sql`: todas las filas deben decir PASA (son 29).
+6. Ejecutar `supabase/tests/pruebas.sql`: todas las filas deben decir PASA (son 46).
 7. Copiar `.env.example` a `.env` y pegar Project URL y anon key (Project Settings → API). Nunca la service_role key.
 
 **Criterios de aceptación**
 - [ ] `select * from public.locales` devuelve 4 filas (parqueaderos 35 m, cafeterías 20 m).
-- [ ] `pruebas.sql` muestra 29 PASA y ninguna FALLA.
+- [ ] `pruebas.sql` muestra 46 PASA y ninguna FALLA.
 - [ ] `npm run dev` muestra «Supabase conectado» en la cabecera.
 - [ ] Si `pruebas.sql` falla al insertar en `auth.users` (nunca se probó en Supabase real): crear 2 usuarios desde la app/Authentication y adaptar el script, o avisar en el issue.
 
@@ -136,11 +136,13 @@ Contexto técnico: `CLAUDE.md` y `docs/CONTEXTO.md`.
 1. Llamar `rpc('estado_local', { p_local_id })`. Respuesta bloqueada: `{ acceso:false, motivo:'sin_reporte_vigente' }`; desbloqueada: `{ acceso:true, estado:{ fila:{valor,hace_min}, cover:{...}, aforo:{...} } }`.
 2. Bloqueado: los pins se siguen viendo, pero el estado aparece difuminado con el texto «Reporta para desbloquear». Mantener el mensaje de valor, no de castigo.
 3. Desbloqueado: mostrar cada tipo con «hace X min». Si `estado` viene vacío: «Sin reportes recientes» (vigencia 60 min).
+4. **Pase gratis:** si `pases_restantes > 0`, el bloqueado ofrece «Ver este local gratis» (con confirmación) que llama `rpc('usar_pase_gratis', { p_local_id })`; luego el estado de ese local llega con `via:'pase'`. MVP = 1 pase; versión final = 3 (parámetro `pases_gratis_max`).
 
 **Criterios de aceptación**
 - [ ] Usuario sin reportes: ve los locales pero no el estado.
 - [ ] Tras reportar: ve el estado de todos los locales.
 - [ ] Pasados 180 min desde su último reporte, vuelve a bloquearse.
+- [ ] Un usuario nuevo puede usar 1 pase en un local, ve solo ese local, y el pase vence a los 180 min.
 
 Contexto técnico: `CLAUDE.md` y `docs/CONTEXTO.md`.
 

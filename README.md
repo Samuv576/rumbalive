@@ -10,9 +10,9 @@ Equipo: Samuel Valencia Buitrago · Sebastian David Sanchez Parra · Miguel Quin
 | Parte | Estado |
 |---|---|
 | Diseño (C4 niveles 1–3, póster, documento de contexto) | Hecho (`docs/`) |
-| Backend SQL: esquema, funciones, RLS, tiempo real | Hecho y probado en Postgres+PostGIS local (29/29). **Aún no ejecutado en un proyecto Supabase real** |
+| Backend SQL: esquema, funciones, RLS, tiempo real | Hecho y probado en Postgres+PostGIS local (46/46). **Aún no ejecutado en un proyecto Supabase real** |
 | Locales del campus con coordenadas medidas | Hecho (4 puntos) |
-| App React: mapa, login, check-in con cuenta regresiva, reporte táctil, Give-to-Get, tiempo real (T02–T07) | Hecho y probado con backend simulado (28 comprobaciones). **Falta validarlo contra Supabase real** |
+| App React: mapa, login, check-in con cuenta regresiva, reporte táctil, Give-to-Get, tiempo real (T02–T07) | Hecho y probado con backend simulado (36 comprobaciones). **Falta validarlo contra Supabase real** |
 | Panel de calibración de coordenadas | Hecho (`?calibrar=1`) |
 | Publicación (HTTPS) y pruebas en el campus | **Pendiente** |
 
@@ -32,7 +32,7 @@ cp .env.example .env        # y completar VITE_SUPABASE_URL y VITE_SUPABASE_ANON
 npm run dev                 # http://localhost:5173
 ```
 
-Sin `.env` la app arranca en **modo demo**: un backend simulado en el navegador con las mismas reglas que el SQL (dwell-time, cooldown, Give-to-Get, tiempo real entre pestañas). Sirve para desarrollar y ensayar sin Supabase; trae un selector para simular la ubicación desde el computador y acepta `?dwell=10&cooldown=15&acceso=60` (segundos) para acortar los tiempos. Con `.env` completo usa Supabase de verdad.
+Sin `.env` la app arranca en **modo demo**: un backend simulado en el navegador con las mismas reglas que el SQL (dwell-time, cooldown, Give-to-Get con 1 pase gratis, tiempo real entre pestañas). Sirve para desarrollar y ensayar sin Supabase; trae un selector para simular la ubicación desde el computador y acepta `?dwell=10&cooldown=15&acceso=60` (segundos) para acortar los tiempos. Con `.env` completo usa Supabase de verdad.
 
 Panel de calibración de coordenadas: `/?calibrar=1`.
 
@@ -47,7 +47,7 @@ Probar en el celular (la geolocalización exige HTTPS):
 2. Ejecutar `supabase/migrations/0004_seed_locales_campus.sql` (los 4 locales del campus).
 3. Ejecutar `supabase/tests/pruebas.sql` → tabla PASA/FALLA, todo debe ser PASA.
 
-`supabase/migrations/0001–0003` son el mismo contenido de `setup_completo.sql` por partes.
+`supabase/migrations/0001–0003` y `0005` (pase gratis) son el mismo contenido de `setup_completo.sql` por partes; `0004` es el seed de locales y se corre aparte.
 
 ## Estructura
 
@@ -64,7 +64,7 @@ tests/e2e/flujo.cjs   prueba de punta a punta del modo demo (Playwright)
 supabase/
   setup_completo.sql    esquema + funciones + RLS
   migrations/           lo mismo por partes + seed de locales
-  tests/pruebas.sql     29 casos de la lógica de negocio
+  tests/pruebas.sql     46 casos de la lógica de negocio
   local/                stub para probar el SQL en un Postgres local (ver su README)
 docs/
   TAREAS.md, issues/    lo que falta, en orden

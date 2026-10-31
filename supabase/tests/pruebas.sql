@@ -186,6 +186,82 @@ begin
   r := public.crear_reporte(la, 'cover', 'gratis', latA, lng, 5);
   perform pg_temp.t('Vigencia: check-in de 2 h 1 s se rechaza', r->>'motivo' = 'dwell_time_no_cumplido', r::text);
 
+
+  -- ===== Pase gratis (0005) =====
+  -- B queda sin acceso por reporte; A (ua) sí lo tiene. Local TEST-B recibe un reporte ajeno para probar el aislamiento.
+  execute 'reset role';
+  update public.usuarios set ultimo_reporte_en = now() - interval '181 minutes' where id = ub;
+  update public.reportes set creado_en = now() where usuario_id = ua and local_id = la and tipo = 'cover';
+  insert into public.reportes (usuario_id, local_id, tipo, valor) values (ua, lb, 'fila', 'corta');
+  execute 'set local role authenticated'; perform set_config('request.jwt.claim.sub', ub::text, true);
+
+  r := public.estado_local(la);
+  perform pg_temp.t('Pase: sin reporte ni pase, B ve «bloqueado» y sabe cuántos pases le quedan', (r->>'acceso')::boolean = false and (r->>'pases_restantes')::int = 1, r::text);
+  r := public.estado_local(la);   -- consultar no gasta el pase
+  perform pg_temp.t('Pase: estado_local nunca gasta un pase', (r->>'pases_restantes')::int = 1, r::text);
+
+  r := public.usar_pase_gratis(la);
+  perform pg_temp.t('Pase: usar el pase en un local funciona y deja 0', (r->>'ok')::boolean and (r->>'pases_restantes')::int = 0, r::text);
+  r := public.usar_pase_gratis(la);
+  perform pg_temp.t('Pase: repetir sobre el mismo local no gasta otro', (r->>'ok')::boolean and (r->>'ya_activo')::boolean, r::text);
+
+  r := public.estado_local(la);
+  perform pg_temp.t('Pase: con pase B ve el estado de ese local (via pase)', (r->>'acceso')::boolean and r->>'via' = 'pase' and r#>>'{estado,cover,valor}' = 'gratis', r::text);
+  select count(*) into n from public.reportes where local_id = la and usuario_id <> ub;
+  perform pg_temp.t('Pase: por SELECT directo/Realtime B lee los reportes ajenos de ese local', n > 0, 'leyó ' || n);
+  select count(*) into n from public.reportes where local_id = lb;
+  perform pg_temp.t('Pase: pero 0 reportes de los demás locales', n = 0, 'leyó ' || n);
+  r := public.estado_local(lb);
+  perform pg_temp.t('Pase: otro local sigue bloqueado y sin pases', (r->>'acceso')::boolean = false and (r->>'pases_restantes')::int = 0, r::text);
+  r := public.usar_pase_gratis(lb);
+  perform pg_temp.t('Pase: con el límite agotado se rechaza («sin_pases»)', (r->>'ok')::boolean = false and r->>'motivo' = 'sin_pases', r::text);
+
+  begin
+    insert into public.pases_gratis (usuario_id, local_id) values (ub, lb);
+    perform pg_temp.t('Pase: INSERT directo en pases_gratis está bloqueado', false, 'se insertó');
+  exception when others then
+    perform pg_temp.t('Pase: INSERT directo en pases_gratis está bloqueado', sqlstate = '42501', sqlerrm);
+  end;
+
+  -- el pase vence
+  execute 'reset role';
+  update public.pases_gratis set creado_en = now() - interval '181 minutes' where usuario_id = ub;
+  execute 'set local role authenticated'; perform set_config('request.jwt.claim.sub', ub::text, true);
+  r := public.estado_local(la);
+  perform pg_temp.t('Pase: a los 181 min el pase vence y vuelve el bloqueo', (r->>'acceso')::boolean = false, r::text);
+  select count(*) into n from public.reportes where local_id = la and usuario_id <> ub;
+  perform pg_temp.t('Pase: vencido, ya no lee reportes por SELECT', n = 0, 'leyó ' || n);
+  r := public.usar_pase_gratis(la);
+  perform pg_temp.t('Pase: no se puede reusar el pase vencido sobre el mismo local', r->>'motivo' = 'pase_ya_usado', r::text);
+
+  -- versión final: 3 pases (solo cambia la configuración)
+  execute 'reset role';
+  update public.config set valor = 3 where clave = 'pases_gratis_max';
+  execute 'set local role authenticated'; perform set_config('request.jwt.claim.sub', ub::text, true);
+  r := public.usar_pase_gratis(lb);
+  perform pg_temp.t('Pase: con pases_gratis_max = 3 el usuario puede gastar otro (le queda 1)', (r->>'ok')::boolean and (r->>'pases_restantes')::int = 1, r::text);
+  execute 'reset role';
+  update public.config set valor = 1 where clave = 'pases_gratis_max';
+
+  -- quien ya tiene acceso por reporte no gasta pases; sin sesión / anon no pueden
+  execute 'set local role authenticated'; perform set_config('request.jwt.claim.sub', ua::text, true);
+  r := public.usar_pase_gratis(la);
+  perform pg_temp.t('Pase: quien ya tiene acceso por reporte no gasta pase', r->>'motivo' = 'ya_tienes_acceso', r::text);
+  begin
+    execute 'reset role'; execute 'set local role anon';
+    perform public.usar_pase_gratis(la);
+    execute 'reset role'; perform pg_temp.t('Pase: anon no ejecuta usar_pase_gratis', false, 'no lanzó error');
+  exception when others then
+    execute 'reset role'; perform pg_temp.t('Pase: anon no ejecuta usar_pase_gratis', sqlstate = '42501', sqlerrm);
+  end;
+  begin
+    execute 'set local role authenticated'; perform set_config('request.jwt.claim.sub', '', true);
+    perform public.usar_pase_gratis(la);
+    execute 'reset role'; perform pg_temp.t('Pase: sin sesión se rechaza', false, 'no lanzó error');
+  exception when others then
+    execute 'reset role'; perform pg_temp.t('Pase: sin sesión se rechaza', sqlerrm = 'no_autenticado', sqlerrm);
+  end;
+
   execute 'reset role';
   -- Limpieza
   delete from auth.users where id in (ua, ub);
