@@ -12,11 +12,11 @@ Equipo: Samuel Valencia Buitrago · Sebastian David Sanchez Parra · Miguel Quin
 | Diseño (C4 niveles 1–3, póster, documento de contexto) | Hecho (`docs/`) |
 | Backend SQL: esquema, funciones, RLS, tiempo real | Hecho y probado en Postgres+PostGIS local (29/29). **Aún no ejecutado en un proyecto Supabase real** |
 | Locales del campus con coordenadas medidas | Hecho (4 puntos) |
-| App React: mapa + panel de calibración de coordenadas | Hecho |
-| App React: login, check-in, reporte, Give-to-Get, tiempo real | **Pendiente** → `docs/TAREAS.md` |
+| App React: mapa, login, check-in con cuenta regresiva, reporte táctil, Give-to-Get, tiempo real (T02–T07) | Hecho y probado con backend simulado (28 comprobaciones). **Falta validarlo contra Supabase real** |
+| Panel de calibración de coordenadas | Hecho (`?calibrar=1`) |
 | Publicación (HTTPS) y pruebas en el campus | **Pendiente** |
 
-**Empieza por `docs/TAREAS.md`** (10 tareas ordenadas, con criterios de aceptación) y lee `CLAUDE.md`, que resume todo lo técnico.
+**Empieza por T01 en `docs/TAREAS.md`** (crear Supabase y conectar la app); luego T08–T10 y lee `CLAUDE.md`, que resume todo lo técnico.
 
 ## Stack
 
@@ -32,7 +32,9 @@ cp .env.example .env        # y completar VITE_SUPABASE_URL y VITE_SUPABASE_ANON
 npm run dev                 # http://localhost:5173
 ```
 
-Sin Supabase la app arranca en «modo calibración» (mapa + coordenadas del GPS).
+Sin `.env` la app arranca en **modo demo**: un backend simulado en el navegador con las mismas reglas que el SQL (dwell-time, cooldown, Give-to-Get, tiempo real entre pestañas). Sirve para desarrollar y ensayar sin Supabase; trae un selector para simular la ubicación desde el computador y acepta `?dwell=10&cooldown=15&acceso=60` (segundos) para acortar los tiempos. Con `.env` completo usa Supabase de verdad.
+
+Panel de calibración de coordenadas: `/?calibrar=1`.
 
 Probar en el celular (la geolocalización exige HTTPS):
 - `npm run dev:https` con PC y celular en la misma red (si la red no deja, usar el hotspot del celular), o
@@ -50,9 +52,15 @@ Probar en el celular (la geolocalización exige HTTPS):
 ## Estructura
 
 ```
-src/                  app React (App.jsx hoy solo es el modo calibración)
-  data/localesDemo.js   locales del campus (a reemplazar por la RPC en T03)
-  lib/supabase.js       cliente Supabase (null si faltan las variables de entorno)
+src/                  app React
+  App.jsx               pantalla principal (T02–T07) · `?calibrar=1` abre la calibración
+  components/           Auth, MapView, EstadoLocal, Accion (check-in + reporte), Calibracion
+  hooks/                useUbicacion (GPS), useEstados (estado + Realtime + reconexión), useAhora
+  lib/                  api.js (las 4 RPC), backend.js (elige Supabase o simulador), mensajes.js (textos)
+                        supabaseBackend.js · mockBackend.js (simulador con las mismas reglas) · geo.js
+  data/localesDemo.js   locales del campus (los usa el simulador y la calibración; la app real los lee por RPC)
+  config.js             reglas de negocio del lado cliente (solo cuenta regresiva y textos)
+tests/e2e/flujo.cjs   prueba de punta a punta del modo demo (Playwright)
 supabase/
   setup_completo.sql    esquema + funciones + RLS
   migrations/           lo mismo por partes + seed de locales

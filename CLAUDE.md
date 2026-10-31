@@ -35,7 +35,12 @@ npm run dev | npm run dev:https | npm run build | npm run preview
 ```
 Probar el SQL sin Supabase: ver `supabase/local/README.md`. Tras editar SQL, ejecutar `supabase/tests/pruebas.sql` (29 casos).
 
+## Cómo está armado el frontend
+`src/lib/backend.js` elige `supabaseBackend` (si hay `.env`) o `mockBackend` (modo demo); ambos exponen la misma interfaz (`getUser, onAuth, signUp, signIn, signOut, rpc, suscribirReportes`). `src/lib/api.js` envuelve las 4 RPC y convierte errores en `motivo`. **Si cambias una función SQL, actualiza también `mockBackend.js`** (es su espejo) y `src/lib/mensajes.js`. `useEstados` mantiene `estado_local` por local, escucha Realtime y refresca todo al reconectar, al volver a la pestaña y cada 30 s.
+
 ## Cosas que NO están verificadas (cuidado)
+- Todo `src/` se probó solo contra el simulador (`tests/e2e/flujo.cjs`, 28 comprobaciones). Contra Supabase real falta: signUp/signIn, `supabase.rpc`, eventos Realtime (`postgres_changes` + RLS `reportes_g2g`, que además se evalúa con el JWT del suscriptor al momento de suscribirse) y el estado del canal al caer la red.
+- Si el Project API Keys nuevo (`sb_publishable_...`) da error «Invalid JWT» con la versión instalada de supabase-js, usar la clave *legacy* anon (JWT) o actualizar `@supabase/supabase-js`.
 - El SQL nunca se ha ejecutado en un proyecto Supabase real; sí en Postgres 16 + PostGIS 3 local con un stub de Supabase.
 - `pruebas.sql` inserta usuarios directo en `auth.users`; si Supabase lo rechaza, hay que adaptarlo.
 - La entrega de eventos Realtime con la política `reportes_g2g` (que llama a una función) debe comprobarse a mano con 2 celulares.
@@ -45,4 +50,4 @@ Probar el SQL sin Supabase: ver `supabase/local/README.md`. Tras editar SQL, eje
 4 locales del campus del TdeA (sede Robledo), en `supabase/migrations/0004_seed_locales_campus.sql` y `src/data/localesDemo.js` (deben coincidir). El póster habla de Provenza/La 70: el campus es el entorno de pruebas del piloto.
 
 ## Qué falta
-`docs/TAREAS.md` (T01–T10).
+T01 (Supabase), validar T02–T07 contra él, y T08–T10: `docs/TAREAS.md`.

@@ -1,20 +1,20 @@
 # Tareas pendientes (en orden)
 
 Cada tarea también está como archivo en `docs/issues/` y se puede subir como *issues* de GitHub con `scripts/crear-issues.sh`.
-El orden importa: T01 desbloquea todo lo demás; T03 puede hacerse en paralelo con T02.
+El orden importa: T01 desbloquea todo lo demás. **T02–T07 ya tienen código** (con un backend simulado para desarrollar sin Supabase): lo que falta es correrlos contra el Supabase real y corregir lo que aparezca.
 
-| ID | Tarea | Área | Depende de |
-|---|---|---|---|
-| T01 | Crear el proyecto Supabase y cargar el backend | infra | — |
-| T02 | Registro e inicio de sesión | frontend | T01 |
-| T03 | Mapa con los locales reales (RPC `locales_cercanos`) | frontend | T01 |
-| T04 | Check-in «Estoy aquí» (RPC `crear_checkin`) | frontend | T02, T03 |
-| T05 | Reporte táctil Zero-Text-Entry (RPC `crear_reporte`) | frontend | T04 |
-| T06 | Give-to-Get: estado bloqueado/desbloqueado (RPC `estado_local`) | frontend | T05 |
-| T07 | Actualización en tiempo real (Supabase Realtime) | frontend | T06 |
-| T08 | Publicar la app (HTTPS) y probarla instalada | devops | T07 |
-| T09 | Pruebas en el campus con 2 celulares | qa | T08 |
-| T10 | Cierre del proyecto: póster, documentos y guion de la demo | documentación | T09 |
+| ID | Tarea | Área | Depende de | Estado |
+|---|---|---|---|---|
+| T01 | Crear el proyecto Supabase y cargar el backend | infra | — | Pendiente |
+| T02 | Registro e inicio de sesión | frontend | T01 | Código hecho, falta validar con Supabase |
+| T03 | Mapa con los locales reales (RPC `locales_cercanos`) | frontend | T01 | Código hecho, falta validar con Supabase |
+| T04 | Check-in «Estoy aquí» (RPC `crear_checkin`) | frontend | T02, T03 | Código hecho, falta validar con Supabase |
+| T05 | Reporte táctil Zero-Text-Entry (RPC `crear_reporte`) | frontend | T04 | Código hecho, falta validar con Supabase |
+| T06 | Give-to-Get: estado bloqueado/desbloqueado (RPC `estado_local`) | frontend | T05 | Código hecho, falta validar con Supabase |
+| T07 | Actualización en tiempo real (Supabase Realtime) | frontend | T06 | Código hecho, falta validar con Supabase |
+| T08 | Publicar la app (HTTPS) y probarla instalada | devops | T07 | Pendiente |
+| T09 | Pruebas en el campus con 2 celulares | qa | T08 | Pendiente |
+| T10 | Cierre del proyecto: póster, documentos y guion de la demo | documentación | T09 | Pendiente |
 
 ---
 
@@ -45,6 +45,8 @@ Contexto técnico: `CLAUDE.md` y `docs/CONTEXTO.md`.
 
 **Área:** frontend  ·  **Depende de:** T01
 
+**Estado:** código listo (`src/`) y probado de punta a punta con el backend simulado del modo demo. Falta confirmarlo contra el Supabase real (depende de T01) — ver `docs/PRUEBAS_E2E.md`.
+
 **Objetivo:** Que el usuario pueda crear cuenta e iniciar sesión con email y contraseña.
 
 **Pasos**
@@ -62,6 +64,8 @@ Contexto técnico: `CLAUDE.md` y `docs/CONTEXTO.md`.
 ### T03 · Mapa con los locales reales (RPC `locales_cercanos`)
 
 **Área:** frontend  ·  **Depende de:** T01
+
+**Estado:** código listo (`src/`) y probado de punta a punta con el backend simulado del modo demo. Falta confirmarlo contra el Supabase real (depende de T01) — ver `docs/PRUEBAS_E2E.md`.
 
 **Objetivo:** Reemplazar `src/data/localesDemo.js` por datos reales de la BD.
 
@@ -82,6 +86,8 @@ Contexto técnico: `CLAUDE.md` y `docs/CONTEXTO.md`.
 
 **Área:** frontend  ·  **Depende de:** T02, T03
 
+**Estado:** código listo (`src/`) y probado de punta a punta con el backend simulado del modo demo. Falta confirmarlo contra el Supabase real (depende de T01) — ver `docs/PRUEBAS_E2E.md`.
+
 **Objetivo:** Registrar la presencia del usuario en un local.
 
 **Pasos**
@@ -100,6 +106,8 @@ Contexto técnico: `CLAUDE.md` y `docs/CONTEXTO.md`.
 ### T05 · Reporte táctil Zero-Text-Entry (RPC `crear_reporte`)
 
 **Área:** frontend  ·  **Depende de:** T04
+
+**Estado:** código listo (`src/`) y probado de punta a punta con el backend simulado del modo demo. Falta confirmarlo contra el Supabase real (depende de T01) — ver `docs/PRUEBAS_E2E.md`.
 
 **Objetivo:** Reportar fila, cover y aforo solo con botones, sin escribir texto.
 
@@ -120,6 +128,8 @@ Contexto técnico: `CLAUDE.md` y `docs/CONTEXTO.md`.
 
 **Área:** frontend  ·  **Depende de:** T05
 
+**Estado:** código listo (`src/`) y probado de punta a punta con el backend simulado del modo demo. Falta confirmarlo contra el Supabase real (depende de T01) — ver `docs/PRUEBAS_E2E.md`.
+
 **Objetivo:** Mostrar fila/cover/aforo solo a quien reportó (acceso 180 min).
 
 **Pasos**
@@ -137,6 +147,8 @@ Contexto técnico: `CLAUDE.md` y `docs/CONTEXTO.md`.
 ### T07 · Actualización en tiempo real (Supabase Realtime)
 
 **Área:** frontend  ·  **Depende de:** T06
+
+**Estado:** código listo (`src/`) y probado de punta a punta con el backend simulado del modo demo. Falta confirmarlo contra el Supabase real (depende de T01) — ver `docs/PRUEBAS_E2E.md`.
 
 **Objetivo:** Que el estado se actualice solo cuando otro usuario reporta.
 
