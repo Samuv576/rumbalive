@@ -10,13 +10,13 @@ Equipo: Samuel Valencia Buitrago · Sebastian David Sanchez Parra · Miguel Quin
 | Parte | Estado |
 |---|---|
 | Diseño (C4 niveles 1–3, póster, documento de contexto) | Hecho (`docs/`) |
-| Backend SQL: esquema, funciones, RLS, tiempo real | Hecho y probado en Postgres+PostGIS local (46/46). **Aún no ejecutado en un proyecto Supabase real** |
+| Backend SQL: esquema, funciones, RLS, tiempo real | Hecho. 46/46 pruebas en Postgres local **y en el proyecto Supabase real** (`rumbalive`) |
 | Locales del campus con coordenadas medidas | Hecho (4 puntos) |
-| App React: mapa, login, check-in con cuenta regresiva, reporte táctil, Give-to-Get, tiempo real (T02–T07) | Hecho y probado con backend simulado (36 comprobaciones). **Falta validarlo contra Supabase real** |
+| App React: mapa, login, check-in con cuenta regresiva, reporte táctil, Give-to-Get, tiempo real (T02–T07) | Hecho y probado con backend simulado (36 comprobaciones). **Falta correrlo contra el Supabase real (hay `.env`)** |
 | Panel de calibración de coordenadas | Hecho (`?calibrar=1`) |
 | Publicación (HTTPS) y pruebas en el campus | **Pendiente** |
 
-**Empieza por T01 en `docs/TAREAS.md`** (crear Supabase y conectar la app); luego T08–T10 y lee `CLAUDE.md`, que resume todo lo técnico.
+**T01 ya está hecho** (Supabase creado y probado). Siguiente: correr la app con su `.env`, validar T02–T07 contra Supabase y seguir con T08–T10 en `docs/TAREAS.md` y lee `CLAUDE.md`, que resume todo lo técnico.
 
 ## Stack
 

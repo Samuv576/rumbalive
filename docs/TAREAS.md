@@ -5,7 +5,7 @@ El orden importa: T01 desbloquea todo lo demás. **T02–T07 ya tienen código**
 
 | ID | Tarea | Área | Depende de | Estado |
 |---|---|---|---|---|
-| T01 | Crear el proyecto Supabase y cargar el backend | infra | — | Pendiente |
+| T01 | Crear el proyecto Supabase y cargar el backend | infra | — | **Hecho** (proyecto `rumbalive`, 46/46 pruebas); falta agregar al equipo |
 | T02 | Registro e inicio de sesión | frontend | T01 | Código hecho, falta validar con Supabase |
 | T03 | Mapa con los locales reales (RPC `locales_cercanos`) | frontend | T01 | Código hecho, falta validar con Supabase |
 | T04 | Check-in «Estoy aquí» (RPC `crear_checkin`) | frontend | T02, T03 | Código hecho, falta validar con Supabase |
@@ -21,6 +21,8 @@ El orden importa: T01 desbloquea todo lo demás. **T02–T07 ya tienen código**
 ### T01 · Crear el proyecto Supabase y cargar el backend
 
 **Área:** infra  ·  **Depende de:** —
+
+**Estado:** proyecto `rumbalive` creado en la cuenta de Samuel (ref `zkjuxchzdliwakztxrap`), `setup_completo.sql` + seed ejecutados, `pruebas.sql` = 46 PASA / 0 FALLA en Supabase real, Realtime activo en `reportes`, «Confirm email» desactivado. **Falta:** agregar a los demás integrantes (paso 3) y que cada uno cree su `.env` (la clave anon legacy está en Project Settings → API Keys → Legacy).
 
 **Objetivo:** Dejar la base de datos funcionando con las reglas de negocio y las 46 pruebas en verde.
 
