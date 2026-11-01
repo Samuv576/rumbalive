@@ -6,5 +6,5 @@ cd "$(dirname "$0")/.."
 for f in docs/issues/T*.md; do
   title=$(head -1 "$f" | sed 's/^# //')
   echo "Creando: $title"
-  gh issue create --title "$title" --body-file <(tail -n +3 "$f")
+  gh issue create --title "$title" --body "$(tail -n +3 "$f")"
 done
