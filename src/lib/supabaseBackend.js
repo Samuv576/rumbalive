@@ -7,7 +7,8 @@ export const supabaseBackend = {
   modo: 'supabase',
 
   async getUser() {
-    const { data } = await supabase.auth.getSession()
+    const { data, error } = await supabase.auth.getSession()
+    if (error) throw error
     return aUsuario(data.session?.user)
   },
 
@@ -29,7 +30,10 @@ export const supabaseBackend = {
     return { user: aUsuario(data.user) }
   },
 
-  async signOut() { await supabase.auth.signOut() },
+  async signOut() {
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+  },
 
   async rpc(nombre, args = {}) {
     const { data, error } = await supabase.rpc(nombre, args)
