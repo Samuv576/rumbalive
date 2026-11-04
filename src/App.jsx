@@ -12,6 +12,7 @@ import EstadoLocal from './components/EstadoLocal.jsx'
 import Accion from './components/Accion.jsx'
 import Auth from './components/Auth.jsx'
 import Calibracion from './components/Calibracion.jsx'
+import { textoErrorAuth } from './lib/mensajes.js'
 
 export default function App() {
   const calibrar = new URLSearchParams(window.location.search).has('calibrar')
@@ -30,12 +31,16 @@ function Principal() {
   const [user, setUser] = useState(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
   const [verAuth, setVerAuth] = useState(false)
+  const [errorAuth, setErrorAuth] = useState(null)
 
   // T02 · sesión: se recupera al recargar y reacciona a entrar/salir.
   useEffect(() => {
     let vivo = true
-    backend.getUser().then(u => { if (vivo) { setUser(u); setCargandoSesion(false) } })
-    const off = backend.onAuth(u => { setUser(u); if (u) setVerAuth(false) })
+    backend.getUser()
+      .then(u => { if (vivo) setUser(u) })
+      .catch(err => { if (vivo) setErrorAuth(textoErrorAuth(err)) })
+      .finally(() => { if (vivo) setCargandoSesion(false) })
+    const off = backend.onAuth(u => { setUser(u); setErrorAuth(null); if (u) setVerAuth(false) })
     return () => { vivo = false; off() }
   }, [])
 
@@ -97,7 +102,7 @@ function Principal() {
   }, [user])
 
   // T06/T07 · estado por local, tiempo real y reconexión.
-  const { estados, conexion, refrescarTodo, refrescarLocal } = useEstados(user, locales)
+  const { estados, conexion, errorEstado, refrescarTodo, refrescarLocal } = useEstados(user, locales)
   const alAccionar = useCallback((localId, reporto) => {
     setSelId(localId)
     if (reporto) refrescarTodo()
@@ -111,7 +116,8 @@ function Principal() {
   }, [refrescarTodo])
 
   const chipConexion = !user ? { t: MODO_DEMO ? 'Demo' : 'Público', c: 'mut' }
-    : conexion === 'conectado' ? { t: 'En vivo', c: 'ok' } : { t: 'Sin conexión', c: 'bad' }
+    : conexion === 'conectado' ? { t: 'En vivo', c: 'ok' }
+      : conexion === 'conectando' ? { t: 'Conectando', c: 'mut' } : { t: 'Sin conexión', c: 'bad' }
 
   return (
     <div className="app">
@@ -120,7 +126,10 @@ function Principal() {
         <div className="top-der">
           <span className={`pill ${chipConexion.c}`} data-testid="conexion">● {chipConexion.t}</span>
           {user
-            ? <button className="lnk" data-testid="salir" onClick={() => { backend.signOut() }} title={user.email}>Salir</button>
+            ? <button className="lnk" data-testid="salir" onClick={async () => {
+                setErrorAuth(null)
+                try { await backend.signOut() } catch (err) { setErrorAuth(textoErrorAuth(err)) }
+              }} title={user.email}>Salir</button>
             : <button className="mini" disabled={cargandoSesion} onClick={() => setVerAuth(true)}>Entrar</button>}
         </div>
       </header>
@@ -128,6 +137,7 @@ function Principal() {
       <MapView locales={locales} selId={selId} onSelect={setSelId} pos={pos} />
 
       <section className="sheet">
+        {errorAuth && <div className="bad banner" role="alert">{errorAuth}</div>}
         {MODO_DEMO && (
           <div className="demo">
             <span>Modo demo (sin Supabase)</span>
@@ -144,6 +154,7 @@ function Principal() {
           <div className="bad banner">No pudimos cargar los locales. <button className="lnk" onClick={() => cargarLocales(posRef.current || CENTRO_INICIAL)}>Reintentar</button></div>
         )}
         {estadoLocales === 'cargando' && !locales.length && <div className="mut banner">Cargando locales…</div>}
+        {user && errorEstado && <div className="bad banner" role="alert">No pudimos actualizar el estado del local. {errorEstado.mensaje}</div>}
 
         {locales.length > 0 && (
           <div className="chips" role="listbox" aria-label="Locales">

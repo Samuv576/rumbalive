@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { backend } from '../lib/backend.js'
 import { estadoLocal } from '../lib/api.js'
+import { textoMotivo } from '../lib/mensajes.js'
 import { REFRESCO_S } from '../config.js'
 
 // Estado Give-to-Get de cada local + Realtime + reconciliación.
 // estados[localId] = { acceso:false, motivo } | { acceso:true, estado:{ fila?, cover?, aforo? } }
-// conexion: 'conectado' | 'desconectado'
+// conexion: 'conectando' | 'conectado' | 'desconectado'
 export function useEstados(user, locales) {
   const [estados, setEstados] = useState({})
-  const [conexion, setConexion] = useState('conectado')
+  const [conexion, setConexion] = useState('conectando')
+  const [errorEstado, setErrorEstado] = useState(null)
   const localesRef = useRef(locales)
   localesRef.current = locales
   const userId = user?.id ?? null
@@ -18,7 +20,11 @@ export function useEstados(user, locales) {
     try {
       const r = await estadoLocal(id)
       setEstados(prev => ({ ...prev, [id]: r }))
-    } catch { /* se conserva lo último que se vio; el próximo refresco lo reconcilia */ }
+      setErrorEstado(prev => prev?.localId === id ? null : prev)
+    } catch (error) {
+      setErrorEstado({ localId: id, mensaje: textoMotivo(error?.motivo || error?.message) })
+      // Se conserva lo último que se vio; el próximo refresco lo reconcilia.
+    }
   }, [userId])
 
   const refrescarTodo = useCallback(async () => {
@@ -34,7 +40,8 @@ export function useEstados(user, locales) {
 
   // Realtime: otro usuario reportó → refrescar solo ese local. Reconexión → refrescar todo (TC-08).
   useEffect(() => {
-    if (!userId) { setConexion('conectado'); return }
+    if (!userId) { setConexion('conectando'); return }
+    setConexion('conectando')
     const cancelar = backend.suscribirReportes({
       onInsert: fila => refrescarLocal(fila.local_id),
       onEstado: s => { setConexion(s); if (s === 'conectado') refrescarTodo() }
@@ -56,5 +63,5 @@ export function useEstados(user, locales) {
     }
   }, [userId, refrescarTodo])
 
-  return { estados, conexion, refrescarTodo, refrescarLocal }
+  return { estados, conexion, errorEstado, refrescarTodo, refrescarLocal }
 }
