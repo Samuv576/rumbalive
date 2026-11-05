@@ -59,3 +59,255 @@ button.lnk { background: none; color: var(--mut); padding: 4px 6px; font-weight:
 .leaflet-container { background:#1d1d2c; }
 .confirma { display:flex; flex-direction:column; gap:8px; background:#2a2a3d; border-radius:10px; padding:10px; }
 .confirma .row { justify-content:flex-start; }
+
+/* Tema Nightlife: estilos sobre las clases ya existentes; no requiere cambios en React. */
+:root {
+  color-scheme: dark;
+  --bg: #080810;
+  --card: rgba(19, 18, 32, 0.9);
+  --fg: #f8f7ff;
+  --mut: #aaa8c2;
+  --acc: #ff2d9b;
+  --neon-cyan: #36e8ff;
+  --neon-green: #58f7a8;
+  --neon-yellow: #ffd166;
+  --neon-orange: #ff8a5b;
+  --neon-red: #ff526f;
+  --line: rgba(191, 172, 255, 0.17);
+  --glow-pink: 0 0 18px rgba(255, 45, 155, 0.3);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 50% -20%, rgba(106, 50, 145, 0.2), transparent 55%),
+    var(--bg);
+  color: var(--fg);
+}
+
+.top {
+  background: rgba(8, 8, 16, 0.88);
+  border-bottom: 1px solid var(--line);
+}
+
+.top h1 {
+  color: #fff;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 16px rgba(255, 45, 155, 0.5);
+}
+
+.sheet {
+  background: rgba(13, 12, 24, 0.88);
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.card {
+  background: linear-gradient(145deg, rgba(30, 27, 48, 0.92), rgba(17, 16, 29, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22);
+}
+
+button {
+  background: linear-gradient(110deg, #ff2d9b, #c52dff);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: var(--glow-pink);
+  transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.12);
+  box-shadow: 0 0 24px rgba(255, 45, 155, 0.46);
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:focus-visible,
+.modal-card input:focus-visible,
+.demo select:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 3px;
+}
+
+button.sec,
+.demo select,
+.chip-local,
+.tab,
+.valor {
+  background: #211d35;
+  border: 1px solid var(--line);
+  color: var(--fg);
+  box-shadow: none;
+}
+
+button.sec:hover:not(:disabled),
+.chip-local:hover,
+.tab:hover:not(:disabled),
+.valor:hover:not(:disabled) {
+  border-color: rgba(54, 232, 255, 0.55);
+  box-shadow: 0 0 16px rgba(54, 232, 255, 0.12);
+}
+
+.chip-local.on {
+  background: #391633;
+  border-color: var(--acc);
+  box-shadow: 0 0 14px rgba(255, 45, 155, 0.24);
+}
+
+.tab.on {
+  color: #fff;
+  background: #17313a;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 14px rgba(54, 232, 255, 0.2);
+}
+
+.valor:not(:disabled):active {
+  background: #391633;
+  border-color: var(--acc);
+}
+
+.chip {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tono-v {
+  background: #103c30;
+  color: var(--neon-green);
+  border-color: rgba(88, 247, 168, 0.35);
+  box-shadow: 0 0 12px rgba(88, 247, 168, 0.12);
+}
+
+.tono-a {
+  background: #453316;
+  color: var(--neon-yellow);
+  border-color: rgba(255, 209, 102, 0.35);
+}
+
+.tono-o {
+  background: #482617;
+  color: var(--neon-orange);
+  border-color: rgba(255, 138, 91, 0.35);
+}
+
+.tono-r {
+  background: #461c2a;
+  color: var(--neon-red);
+  border-color: rgba(255, 82, 111, 0.4);
+  box-shadow: 0 0 12px rgba(255, 82, 111, 0.14);
+}
+
+.ok {
+  color: var(--neon-green);
+}
+
+.warn {
+  color: var(--neon-yellow);
+}
+
+.bad {
+  color: #ff788b;
+}
+
+.barra {
+  background: #29243d;
+}
+
+.barra i {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--acc));
+  box-shadow: 0 0 12px rgba(255, 45, 155, 0.5);
+}
+
+.modal {
+  background: rgba(3, 3, 10, 0.76);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-card {
+  background: rgba(19, 18, 32, 0.97);
+  border: 1px solid var(--line);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.48);
+}
+
+.modal-card input {
+  background: #0c0b16;
+  border-color: #39334f;
+}
+
+.confirma {
+  background: rgba(39, 31, 59, 0.9);
+  border: 1px solid rgba(255, 45, 155, 0.24);
+}
+
+/* Mantiene visible el selector de locales dentro del panel desplazable. */
+.sheet {
+  min-height: 0;
+  overscroll-behavior-y: contain;
+  scrollbar-color: rgba(255, 45, 155, 0.55) rgba(255, 255, 255, 0.06);
+}
+
+.sheet > * {
+  flex-shrink: 0;
+}
+
+.chips {
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 44px;
+  padding: 3px 1px 7px;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.chip-local {
+  flex: 0 0 auto;
+}
+
+.banner.bad,
+.banner.warn {
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: rgba(25, 21, 38, 0.9);
+}
+
+.banner.bad {
+  border: 1px solid rgba(255, 82, 111, 0.3);
+}
+
+.banner.warn {
+  border: 1px solid rgba(255, 209, 102, 0.28);
+}
+
+/* Oscurece las teselas; pins y geocercas de Leaflet conservan sus colores. */
+.leaflet-tile-pane {
+  filter: brightness(0.62) invert(1) hue-rotate(180deg) saturate(0.78);
+}
+
+.leaflet-tooltip {
+  background: #171426;
+  color: var(--fg);
+  border: 1px solid rgba(255, 45, 155, 0.45);
+  box-shadow: 0 0 14px rgba(255, 45, 155, 0.2);
+}
+
+.leaflet-tooltip-top::before {
+  border-top-color: #171426;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
